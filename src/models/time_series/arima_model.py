@@ -1,6 +1,7 @@
 import os
 import sys
 import pandas as pd
+import plotly.graph_objects as go
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from data import db_utils
 import matplotlib.pyplot as plt
@@ -14,9 +15,8 @@ df = db_utils.fetch_data(query)
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 df.set_index('timestamp', inplace=True)
 
-# Adatok vizualizálása
 plt.figure(figsize=(18, 12))
-plt.plot(df['sleepheartrate'])
+plt.plot(df['sleepheartrate'], label='Historical Data')
 plt.title('Sleep Heart Rate Over Time')
 plt.xlabel('Time')
 plt.ylabel('Heart Rate')
