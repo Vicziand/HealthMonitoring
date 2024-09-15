@@ -1,1 +1,1 @@
-from .supervised import *
+from .supervised_chd import *

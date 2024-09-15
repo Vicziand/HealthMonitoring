@@ -5,62 +5,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import xgboost as xgb
 from data import db_utils
+import tensorflow as tf
+from sklearn import svm
 
-def create_table():
-    conn = db_utils.db_connection()
-    cur = conn.cursor()
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS chd (
-            id SERIAL PRIMARY KEY,
-            male INTEGER,
-            age INTEGER,
-            currentsmoker INTEGER,
-            cigsperday INTEGER,
-            bpmeds INTEGER,
-            prevalentstroke INTEGER,
-            prevalenthyp INTEGER,
-            diabetes INTEGER,
-            heartrate INTEGER,
-            bmi FLOAT,
-            tenyearchd INTEGER
-        );
-    ''')
-    conn.commit()
-    cur.close()
-    conn.close()
-    
-def clear_table():
-    conn = db_utils.db_connection()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM chd;")
-    conn.commit()
-    cur.close()
-    conn.close()
 
-def data_load():
-    Rawdata = pd.read_csv("src/data/raw/training_data_chd.csv")
-
-    data = Rawdata[['male','age','currentSmoker','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']].dropna().rename(columns=str.lower)
-    #st.write(data[['male','age','currentSmoker','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']])
-    conn = db_utils.db_connection()
-    cur = conn.cursor()
-
-    # Minden sor beszúrása a táblába
-    for i, row in data.iterrows():
-        cur.execute("""
-            INSERT INTO chd (male, age, currentsmoker, cigsperday, bpmeds, 
-            prevalentstroke, prevalenthyp, diabetes, heartrate, bmi, tenyearchd)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, tuple(row))
-
-    conn.commit()
-    cur.close()
-    conn.close()
-
-def create_variables():
+def create_chd_variables():
     
     conn = db_utils.db_connection()
     query = """
@@ -71,20 +24,32 @@ def create_variables():
 
     data = pd.read_sql(query, conn)
     conn.close()
-    print(data.columns)
     
     # Független változók
     x = data[['male', 'age', 'currentsmoker', 'cigsperday', 'bpmeds', 
               'prevalentstroke', 'prevalenthyp', 'diabetes', 'heartrate', 'bmi']]
+    
+    print(x.isna().any())
     
     # Függő változó
     y = data[['tenyearchd']]
     return x,y
 
 def smote(x,y):
+    females = x[x['male'] == 0]
+    y_females = y[x['male'] == 0]
+    
+    males = x[x['male'] == 1]
+    y_males = y[x['male'] == 1]
+    
     smote = SMOTE(random_state=42)
-    X_ros, y_ros = smote.fit_resample(x, y)
-    y_ros.value_counts().plot(kind='bar')
+    X_females_resampled, y_females_resampled = smote.fit_resample(females, y_females)
+    X_males_resampled, y_males_resampled = smote.fit_resample(males, y_males)
+    
+    X_ros = pd.concat([X_females_resampled, X_males_resampled])
+    y_ros = pd.concat([y_females_resampled, y_males_resampled])
+
+    # Az új osztályeloszlás megtekintése
     y_ros.value_counts().plot(kind='bar')
     return X_ros, y_ros
 
@@ -103,21 +68,52 @@ def data_scaler(x_train, x_test):
     X_test_scaled = scaler.transform(x_test)
     return X_train_scaled, X_test_scaled, scaler
 
+def data_preprocessing(x,y):
+    X_ros, y_ros = smote(x,y)
+    x_train, x_test, y_train, y_test = split_data(X_ros, y_ros)
+    X_train_scaled, X_test_scaled, scaler = data_scaler(x_train, x_test)
+    return X_train_scaled, X_test_scaled, scaler, y_train, y_test
+
 def train_log_reg(X_train_scaled, y_train):
     LogRegModel = LogisticRegression(max_iter = 1000, class_weight='balanced')
-
     LogRegModel.fit(X_train_scaled, y_train.values.ravel())
     return LogRegModel
 
 def train_random_forest(X_train_scaled, y_train):
     RFModel = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
-    RFModel.fit(X_train_scaled, y_train)
+    RFModel.fit(X_train_scaled, y_train.values.ravel())
     return RFModel
 
 def train_xgboost(X_train_scaled, y_train):
-    XGBModel = xgb.XGBClassifier()
-    XGBModel.fit(X_train_scaled, y_train)
+    XGBModel = xgb.XGBClassifier(colsample_bytree= 0.6,
+                                 eval_metric= 'logloss',
+                                 gamma= 2,
+                                 learning_rate= 0.1,
+                                 max_depth= 5,
+                                 min_child_weight= 1,
+                                 subsample= 0.8,
+                                 use_label_encoder=False,
+                                 verbosity = 0)
+    XGBModel.fit(X_train_scaled, y_train.values.ravel())
     return XGBModel
+
+def train_KNN(X_train_scaled, y_train):
+    KNN = KNeighborsClassifier(n_neighbors=2)
+    KNN.fit(X_train_scaled, y_train.values.ravel())
+    return KNN
+
+def train_SVM(X_train_scaled, y_train):
+    SVMModel = svm.SVC(probability=True, kernel='rbf', C=1.0, gamma='scale')
+    SVMModel.fit(X_train_scaled, y_train.values.ravel())
+    return SVMModel
+
+def train_models(X_train_scaled, y_train):
+    LogRegModel = train_log_reg(X_train_scaled, y_train)
+    RFModel = train_random_forest(X_train_scaled, y_train)
+    XGBModel = train_xgboost(X_train_scaled, y_train)
+    KNNModel = train_KNN(X_train_scaled, y_train)
+    SVMModel = train_SVM(X_train_scaled, y_train)
+    return [LogRegModel, RFModel, XGBModel, KNNModel,SVMModel]
 
 def model_accuracy(model, X_test_scaled, y_test):
     y_pred = model.predict(X_test_scaled)
