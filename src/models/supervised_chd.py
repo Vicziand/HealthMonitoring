@@ -11,6 +11,7 @@ import xgboost as xgb
 from data import db_utils
 import tensorflow as tf
 from sklearn import svm
+from sklearn.model_selection import GridSearchCV
 
 
 def create_chd_variables():
@@ -80,7 +81,7 @@ def train_log_reg(X_train_scaled, y_train):
     return LogRegModel
 
 def train_random_forest(X_train_scaled, y_train):
-    RFModel = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
+    RFModel = RandomForestClassifier(n_estimators=100, random_state=0, class_weight='balanced')
     RFModel.fit(X_train_scaled, y_train.values.ravel())
     return RFModel
 
@@ -98,7 +99,12 @@ def train_xgboost(X_train_scaled, y_train):
     return XGBModel
 
 def train_KNN(X_train_scaled, y_train):
-    KNN = KNeighborsClassifier(n_neighbors=2)
+    param_grid = {'n_neighbors': range(1, 10)}
+    grid_search = GridSearchCV(KNeighborsClassifier(), param_grid, cv=5)
+    grid_search.fit(X_train_scaled, y_train.values.ravel())
+
+    print("Legjobb paraméterek:", grid_search.best_params_)
+    KNN = KNeighborsClassifier(n_neighbors=3, weights='distance')
     KNN.fit(X_train_scaled, y_train.values.ravel())
     return KNN
 

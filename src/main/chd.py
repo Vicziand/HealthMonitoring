@@ -36,145 +36,151 @@ for model in models:
 form = st.form(key="form_settings")
 col1, col2, col3 = form.columns([1, 2, 2])
 
-age_value = col1.slider(
-    "Életkor",
-    16,
-    100,
-    key = "age",
-)
+with form:
 
-gender_options = ["férfi","nő"] 
-gender = col1.radio(
-    "Neme",
-    options = gender_options,
-    key = "gender",
+    age_value = col1.slider(
+        "Életkor",
+        16,
+        100,
+        key = "age",
     )
 
-gender_value = 1 if gender == "férfi" else 0
-st.write(f"Választott nem: {gender}, numerikus érték: {gender_value}")
+    gender_options = ["férfi","nő"] 
+    gender = col1.radio(
+        "Neme",
+        options = gender_options,
+        key = "gender",
+        )
 
-height_value = col2.slider(
-    "Magasság (cm)",
-    130,
-    220,
-    key = "height"
-)
+    gender_value = 1 if gender == "férfi" else 0
 
-weight_value = col3.slider(
-    "Súly (kg)",
-    20,
-    250,
-    key = "weight",
-)
+    height_value = col2.slider(
+        "Magasság (cm)",
+        130,
+        220,
+        key = "height"
+    )
 
-bmi_value = weight_value / ((height_value * 0.01) ** 2)
+    weight_value = col3.slider(
+        "Súly (kg)",
+        20,
+        250,
+        key = "weight",
+    )
 
-cigs_per_day_value = col2.slider(
-    "Napi elszívott cigaretta mennyisége", 
-    min_value=0, max_value=80, value=0, step=1
-)
+    bmi_value = weight_value / ((height_value * 0.01) ** 2)
 
-current_smoker_value = 0 if cigs_per_day_value == 0 else 1
+    cigs_per_day_value = col2.slider(
+        "Napi elszívott cigaretta mennyisége", 
+        min_value=0, max_value=80, value=0, step=1
+    )
 
-heart_rate_value = col3.slider(
-    "Nyugalmi pulzus",
-    40,
-    100,
-    key = "heart_rate"
-)
+    current_smoker_value = 0 if cigs_per_day_value == 0 else 1
 
-bp_meds = col2.checkbox(
-    "Szed vérnyomáscsökkentő gyógyszert?", 
-    value = False,
-    key="bpmeds"
-)
-bp_meds_value = 0 if bp_meds == False else 1
+    heart_rate_value = col3.slider(
+        "Nyugalmi pulzus",
+        40,
+        100,
+        key = "heart_rate"
+    )
 
-prevalent_stroke = col3.checkbox(
-    "Volt korábban stroke-ja?",
-    value = False,
-    key="prevalent_stroke",
-)
-prevalent_stroke_value = 0 if bp_meds == False else 1
+    bp_meds = col2.checkbox(
+        "Szed vérnyomáscsökkentő gyógyszert?", 
+        value = False,
+        key="bpmeds"
+    )
+    bp_meds_value = 0 if bp_meds == False else 1
 
-prevalent_hyp = col2.checkbox(
-    "Kezelték már korábban magas vérnyomással?",
-    value = False,
-    key = "prevalent_hyp",
-)
-prevalent_hyp_value = 0 if prevalent_hyp == False else 1
+    prevalent_stroke = col3.checkbox(
+        "Volt korábban stroke-ja?",
+        value = False,
+        key="prevalent_stroke",
+    )
+    prevalent_stroke_value = 0 if bp_meds == False else 1
 
-diabetes = col3.checkbox(
-    "Szenved cukorbetegségben?",
-    value = False,
-    key = "diabetes"
-)
-diabetes_value = 0 if diabetes == False else 1
+    prevalent_hyp = col2.checkbox(
+        "Kezelték már korábban magas vérnyomással?",
+        value = False,
+        key = "prevalent_hyp",
+    )
+    prevalent_hyp_value = 0 if prevalent_hyp == False else 1
 
-st.write(f"Bmi {bmi_value}")
-st.write(f"Dohányzik? {current_smoker_value}")
-st.write(f"Mennyit Dohányzik? {cigs_per_day_value}")
-st.write(f"Életkor: {age_value}")
-st.write(f"Pulzus {heart_rate_value}")
-st.write(f"Bpm {bp_meds_value}")
-st.write(f"Stroke {prevalent_stroke_value}")
-st.write(f"Magas vérnyomás {prevalent_hyp_value}")
-st.write(f"Cukorbetegség {diabetes_value}")
+    diabetes = col3.checkbox(
+        "Szenved cukorbetegségben?",
+        value = False,
+        key = "diabetes"
+    )
+    diabetes_value = 0 if diabetes == False else 1
 
-form.form_submit_button(label="Elfogad")
+    submit_button = st.form_submit_button(label="Elküld")
 
-your_data = pd.DataFrame({
-    'male' : [gender_value],
-    'age': [age_value],
-    'currentsmoker': [current_smoker_value],
-    'cigsperday' : [cigs_per_day_value],
-    'bpmeds' : [bp_meds_value],
-    'prevalentstroke' : [prevalent_stroke_value],
-    'prevalenthyp': [prevalent_hyp_value],
-    'diabetes': [diabetes_value],
-    'heartrate': [heart_rate_value],
-    'bmi': [bmi_value]
-})
+if submit_button:
 
-your_data_scaled = scaler.transform(your_data)
-your_pred = models[1].predict(your_data_scaled)
-your_prob = models[1].predict_proba(your_data_scaled)
-chd_prob = your_prob[0][1]
+    your_data = pd.DataFrame({
+        'male' : [gender_value],
+        'age': [age_value],
+        'currentsmoker': [current_smoker_value],
+        'cigsperday' : [cigs_per_day_value],
+        'bpmeds' : [bp_meds_value],
+        'prevalentstroke' : [prevalent_stroke_value],
+        'prevalenthyp': [prevalent_hyp_value],
+        'diabetes': [diabetes_value],
+        'heartrate': [heart_rate_value],
+        'bmi': [bmi_value]
+    })
 
-fig = go.Figure(go.Indicator(
-    mode = "gauge+number",
-    value = chd_prob * 100,
-    title = {'text': "Koronária szívbetegség valószínűsége 10 éven belül (%)"},
-    gauge = {
-        'axis': {'range': [0, 100]},
-        'bar': {'color': "black"},
-        'steps' : [
-            {'range': [0, 25], 'color': "green"},
-            {'range': [25, 50], 'color': "yellowgreen"},
-            {'range': [50, 75], 'color': "orange"},
-            {'range': [75, 100], 'color': "red"}],
-    }
-))
+    your_data_scaled = scaler.transform(your_data)
+    your_pred = models[0].predict(your_data_scaled)
+    your_prob = models[0].predict_proba(your_data_scaled)
+    chd_prob = your_prob[0][1]
 
-# Modell koefficiensek lekérése
-coef = models[0].coef_[0]
+    fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = chd_prob * 100,
+        title = {'text': "Koronária szívbetegség valószínűsége 10 éven belül (%)"},
+        gauge = {
+            'axis': {'range': [0, 100]},
+            'bar': {'color': "black"},
+            'steps' : [
+                {'range': [0, 25], 'color': "green"},
+                {'range': [25, 50], 'color': "yellowgreen"},
+                {'range': [50, 75], 'color': "orange"},
+                {'range': [75, 100], 'color': "red"}],
+        }
+    ))
 
-# Változók neveinek hozzárendelése a koefficiensekhez
-feature_importance = pd.DataFrame({
-    'Feature': ['male', 'age', 'currentsmoker', 'cigsperday', 'bpmeds', 
-                'prevalentstroke', 'prevalenthyp', 'diabetes', 'heartrate', 'bmi'],
-    'Coefficient': coef
-})
+    # Modell koefficiensek lekérése
+    coef = models[0].coef_[0]
 
-# Koefficiensek abszolút értékének vizsgálata (hogy jobban lássuk a súlyozást)
-feature_importance['Abs_Coefficient'] = np.abs(feature_importance['Coefficient'])
-feature_importance = feature_importance.sort_values(by='Abs_Coefficient', ascending=False)
+    # Változók neveinek hozzárendelése a koefficiensekhez
+    feature_importance = pd.DataFrame({
+        'Feature': ['male', 'age', 'currentsmoker', 'cigsperday', 'bpmeds', 
+                    'prevalentstroke', 'prevalenthyp', 'diabetes', 'heartrate', 'bmi'],
+        'Coefficient': coef
+    })
 
-# Eredmények megjelenítése
-print(feature_importance)
+    # Koefficiensek abszolút értékének vizsgálata (hogy jobban lássuk a súlyozást)
+    feature_importance['Abs_Coefficient'] = np.abs(feature_importance['Coefficient'])
+    feature_importance = feature_importance.sort_values(by='Abs_Coefficient', ascending=False)
 
-st.plotly_chart(fig)
+    # Eredmények megjelenítése
+    print(feature_importance)
 
-print(f"Saját predikált koronária szívbetegség valószínűsége (CHD): {your_prob[0][1]:.2f}")
-print(f"Saját predikált koronária kockázat (TenYearCHD): {your_pred[0]}")
+    st.plotly_chart(fig)
 
+    print(f"Saját predikált koronária szívbetegség valószínűsége (CHD): {your_prob[0][1]:.2f}")
+    print(f"Saját predikált koronária kockázat (TenYearCHD): {your_pred[0]}")
+    
+    if chd_prob * 100 > 50:
+        st.write("A megadott paraméterek alapján magas a kockázati szint.")
+        st.write("Az életkor előrehaladtával növekszik a kockázat.")
+    elif chd_prob * 100 > 25:
+        st.write("A megadott paraméterek alapján mérsékelt a kockázati szint.")
+        st.write("Az életkor előrehaladtával növekszik a kockázat.")
+    else:
+        st.write("A megadott paraméterek alapján alacsony a kockázati szint.")
+        st.write("Az életkor előrehaladtával növekszik a kockázat.")
+    if current_smoker_value == 1:
+            st.write("A dohányzás jelentősen növeli a szív és érrendszeri problámák kockázatát.")
+    if bmi_value > 30:
+            st.write("Az ön testömegindexe alapján túlsúlyos kategóriába tartozik. Az egészséges életmód és a fittség hozzájárul a kockázat csökkentéséhez.")

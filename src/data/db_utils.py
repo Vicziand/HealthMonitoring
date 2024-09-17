@@ -23,7 +23,7 @@ def fetch_data(query):
 def create_chd_table():
     conn = db_connection()
     cur = conn.cursor()
-    cur.execute('''
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS chd (
             id SERIAL PRIMARY KEY,
             male INTEGER,
@@ -38,7 +38,7 @@ def create_chd_table():
             bmi FLOAT,
             tenyearchd INTEGER
         );
-    ''')
+    """)
     conn.commit()
     cur.close()
     conn.close()
@@ -54,7 +54,7 @@ def clear_chd_table():
 def data_load_chd():
     Rawdata = pd.read_csv("src/data/raw/training_data_chd.csv")
 
-    data = Rawdata[['male','age','currentSmoker','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']].dropna().rename(columns=str.lower)
+    data = Rawdata[['male','age','currentSmoker','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']].dropna()
     #st.write(data[['male','age','currentSmoker','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']])
     conn = db_connection()
     cur = conn.cursor()
@@ -76,3 +76,32 @@ def prepare_chd_data():
     clear_chd_table()
     data_load_chd()
     
+def create_sleep_table():
+    conn = db_connection()
+    cur = conn.cursor()
+    cur.execute("""
+            CREATE TABLE IF NOT EXIST sleep(
+                id SERIAL PRIMARY KEY,
+                gender INTEGER,
+                age INTEGER,
+                duration FLOAT,
+                quality INTEGER,
+                activity INTEGER,
+                stress INTEGER,
+                bmi INTEGER,
+                heartrate INTEGER,
+                steps INTEGER,
+                disorder INTEGER,
+            );
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+def clear_sleep_table():
+    conn = db_connection()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM sleep;")
+    conn.commit()
+    cur.close()
+    conn.close()
