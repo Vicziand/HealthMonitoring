@@ -3,6 +3,8 @@ from sqlalchemy import create_engine
 #SQLAlchemy egy python csomag, ami sql adatbázis kapcsolat létrehozására szolgál
 import pandas as pd
 #A Pandas egy Python könyvtár, ami adatok feldolgozására és elemzésére szolgál.
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import LabelEncoder
 
 def db_connection():
     return psycopg2.connect(
@@ -105,3 +107,22 @@ def clear_sleep_table():
     conn.commit()
     cur.close()
     conn.close()
+    
+def data_load_sleep():
+    Rawdata = pd.read_csv("src/data/raw/training_data_sleep.csv")
+
+    data = Rawdata[['Gender','Age','Sleep Duration','Quality of Sleep','Physical Activity Level','Stress Level','BMI Category','Heart Rate','Daily Steps','Sleep Disorder']]
+    data['Sleep Disorder'].fillna('None', inplace=True)
+    data['BMI Category']=data['BMI Category'].replace({'Normal Weight':'Normal'})
+
+    label_encoder_gender = LabelEncoder()
+    encoder_disorder = OrdinalEncoder(categories=[['None', 'Sleep Apnea', 'Insomnia']])
+    encoder_bmi = OrdinalEncoder(categories=[['Normal', 'Overweight', 'Obese']])
+    data['gender'] = label_encoder_gender.fit_transform(data['Gender'])
+    
+    data['disorder'] = encoder_disorder.fit_transform(data[['Sleep Disorder']])
+    data['bmi'] = encoder_bmi.fit_transform(data[['BMI Category']])
+    data['gender'] = label_encoder_gender.fit_transform(data['Gender'])
+    
+    return data
+    
