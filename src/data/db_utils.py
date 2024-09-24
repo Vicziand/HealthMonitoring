@@ -82,7 +82,7 @@ def create_sleep_table():
     conn = db_connection()
     cur = conn.cursor()
     cur.execute("""
-            CREATE TABLE IF NOT EXIST sleep(
+            CREATE TABLE IF NOT EXISTS sleep(
                 id SERIAL PRIMARY KEY,
                 gender INTEGER,
                 age INTEGER,
@@ -93,7 +93,7 @@ def create_sleep_table():
                 bmi INTEGER,
                 heartrate INTEGER,
                 steps INTEGER,
-                disorder INTEGER,
+                disorder INTEGER
             );
     """)
     conn.commit()
@@ -108,7 +108,7 @@ def clear_sleep_table():
     cur.close()
     conn.close()
     
-def data_load_sleep():
+def data_clean_sleep():
     Rawdata = pd.read_csv("src/data/raw/training_data_sleep.csv")
 
     data = Rawdata[['Gender','Age','Sleep Duration','Quality of Sleep','Physical Activity Level','Stress Level','BMI Category','Heart Rate','Daily Steps','Sleep Disorder']]
@@ -125,4 +125,28 @@ def data_load_sleep():
     data['gender'] = label_encoder_gender.fit_transform(data['Gender'])
     
     return data
+
+def data_load_sleep(data):
+    conn = db_connection()
+    cur = conn.cursor()
+
+    # Minden sor beszúrása a táblába
+    for i, row in data.iterrows():
+        cur.execute("""
+            INSERT INTO sleep (gender, age, duration, quality, activity, 
+            stress, bmi, heartrate, steps, disorder)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (row['gender'], row['Age'], row['Sleep Duration'], row['Quality of Sleep'],
+              row['Physical Activity Level'], row['Stress Level'], row['bmi'], 
+              row['Heart Rate'], row['Daily Steps'], row['disorder']))
+        
+
+    conn.commit()
+    cur.close()
+    conn.close()
     
+def prepare_sleep_data():
+    create_sleep_table()
+    clear_sleep_table()
+    data = data_clean_sleep()
+    data_load_sleep(data)

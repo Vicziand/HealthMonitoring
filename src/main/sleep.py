@@ -7,5 +7,6 @@ from models.supervised_chd import *
 from data.db_utils import *
 
 
-data = data_load_sleep()
+data = data_clean_sleep()
+prepare_sleep_data()
 st.write(data)
