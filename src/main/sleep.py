@@ -14,21 +14,10 @@ x,y = create_sleep_variables()
 X_train_scaled, X_test_scaled, scaler, y_train, y_test = sleep_data_preprocessing(x,y)
 
 LogRegModel = train_log_reg(X_train_scaled, y_train)
-model_accuracy(LogRegModel, X_test_scaled, y_test)
+RFModel = train_random_forest(X_train_scaled, y_train)
+model_accuracy(RFModel, X_test_scaled, y_test)
 
 st.write(data)
-
-your_data = pd.DataFrame({
-    'gender' : [1],
-    'age': [27],
-    'duration': [8],
-    'quality' : [8],
-    'activity' : [45],
-    'stress' : [4],
-    'bmi': [1],
-    'heartrate': [70],
-    'steps': [5200],
-})
 
 form = st.form(key="form_settings")
 col1, col2, col3 = form.columns([1, 2, 2])
@@ -74,7 +63,7 @@ with form:
         key = "activity",
     )
     
-    quality_value = col3.slider(
+    stress_value = col3.slider(
         "Stressz-szint",
         0,
         10,
@@ -104,7 +93,7 @@ with form:
         key = "heart_rate"
     )
     
-    heart_rate_value = col3.slider(
+    steps_value = col3.slider(
         "Napi lépésszám",
         1000,
         10000,
@@ -114,8 +103,29 @@ with form:
     
 
     submit_button = st.form_submit_button(label="Elküld")
+    
+if submit_button:
 
-your_data_scaled = scaler.transform(your_data)
-your_pred = LogRegModel.predict(your_data_scaled)
+    your_data = pd.DataFrame({
+    'gender' : [gender_value],
+    'age': [age_value],
+    'duration': [duration_value],
+    'quality' : [quality_value],
+    'activity' : [activity_value],
+    'stress' : [stress_value],
+    'bmi': [bmi_value],
+    'heartrate': [heart_rate_value],
+    'steps': [steps_value],
+    })
+    
+    your_data_scaled = scaler.transform(your_data)
+    your_pred = RFModel.predict(your_data_scaled)
 
-st.write(your_pred)
+    if your_pred == 0:
+        st.write("Nincs rendellenesség!")
+    elif your_pred == 1:
+        st.write("Alvási apnoé")
+    else:
+        st.write("Insomnia")
+    
+    print(your_pred)

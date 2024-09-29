@@ -5,6 +5,11 @@ import pandas as pd
 #A Pandas egy Python könyvtár, ami adatok feldolgozására és elemzésére szolgál.
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import LabelEncoder
+from sklearn.impute import SimpleImputer
+import streamlit as st
+import matplotlib.pyplot as plt
+import seaborn as sns
+#sns.set_style('darkgrid')
 
 def db_connection():
     return psycopg2.connect(
@@ -53,11 +58,37 @@ def clear_chd_table():
     cur.close()
     conn.close()
 
-def data_load_chd():
-    Rawdata = pd.read_csv("src/data/raw/training_data_chd.csv")
 
-    data = Rawdata[['male','age','currentSmoker','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']].dropna()
-    #st.write(data[['male','age','currentSmoker','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']])
+def data_clean_chd():
+    Rawdata = pd.read_csv("src/data/raw/training_data_chd.csv")
+    #data = Rawdata[['male','age','currentSmoker','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']]
+    
+    data_clean = Rawdata.copy()
+
+    # Hiányzó értékek kitöltése a 'BPMeds' oszlopban a leggyakoribb értékkel
+    si_freq = SimpleImputer(strategy='most_frequent')
+    data_clean['BPMeds'] = si_freq.fit_transform(Rawdata[['BPMeds']])
+    data_clean['education'] = si_freq.fit_transform(Rawdata[['education']])
+    # A maradék oszlopok kitöltése átlaggal (kivéve a 'BPMeds' és 'education' oszlopokat)
+    remaining_columns = data_clean.columns.difference(['BPMeds', 'education'])
+    si_mean = SimpleImputer(strategy='median')
+    data_clean[remaining_columns] = pd.DataFrame(si_mean.fit_transform(data_clean[remaining_columns]), 
+                                                 columns=remaining_columns, 
+                                                 index=data_clean.index)
+    # Ellenőrzés, hogy sikerült-e a hiányzó adatok kitöltése
+    print(data_clean.isnull().sum())
+    st.write(data_clean)
+    
+    return data_clean
+
+def correlation_chd(data_clean):
+    plt.figure(figsize= (16, 8))
+    sns.heatmap(data_clean.corr(), annot = True, cmap= 'RdYlBu', fmt= '.2f');
+    st.pyplot(plt)
+
+
+def data_load_chd(data):
+    
     conn = db_connection()
     cur = conn.cursor()
 
@@ -76,7 +107,8 @@ def data_load_chd():
 def prepare_chd_data():
     create_chd_table()
     clear_chd_table()
-    data_load_chd()
+    data = data_clean_chd()
+    data_load_chd(data)
     
 def create_sleep_table():
     conn = db_connection()
