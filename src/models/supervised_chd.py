@@ -18,7 +18,7 @@ def create_chd_variables():
     
     conn = db_utils.db_connection()
     query = """
-    SELECT "male", "age", "currentsmoker", "cigsperday", "bpmeds", "prevalentstroke", 
+    SELECT "male", "age", "cigsperday", "bpmeds", "prevalentstroke", 
        "prevalenthyp", "diabetes", "heartrate", "bmi", "tenyearchd"
     FROM chd;
     """ 
@@ -27,7 +27,7 @@ def create_chd_variables():
     conn.close()
     
     # Független változók
-    x = data[['male', 'age', 'currentsmoker', 'cigsperday', 'bpmeds', 
+    x = data[['male', 'age', 'cigsperday', 'bpmeds', 
               'prevalentstroke', 'prevalenthyp', 'diabetes', 'heartrate', 'bmi']]
     
     print(x.isna().any())
@@ -37,29 +37,16 @@ def create_chd_variables():
     return x,y
 
 def smote(x,y):
-    females = x[x['male'] == 0]
-    y_females = y[x['male'] == 0]
-    
-    males = x[x['male'] == 1]
-    y_males = y[x['male'] == 1]
-    
     smote = SMOTE(random_state=42)
-    X_females_resampled, y_females_resampled = smote.fit_resample(females, y_females)
-    X_males_resampled, y_males_resampled = smote.fit_resample(males, y_males)
-    
-    X_ros = pd.concat([X_females_resampled, X_males_resampled])
-    y_ros = pd.concat([y_females_resampled, y_males_resampled])
-
-    # Az új osztályeloszlás megtekintése
-    y_ros.value_counts().plot(kind='bar')
-    return X_ros, y_ros
+    X_res, y_res = smote.fit_resample(x, y)
+    return X_res, y_res
 
 #st.write("Kiegyensúlyozott adatkészlet osztályeloszlása:")
 #st.pyplot(plt.gcf())
 
-def split_data(X_ros, y_ros):
+def split_data(X_res, y_res):
     # Adatok felosztása tanuló és teszt adatokra (80% tanuló, 20% teszt, randomizációs mag 42 - általánosan használt érték)
-    x_train, x_test, y_train, y_test = train_test_split(X_ros, y_ros, test_size = 0.2, random_state = 42)
+    x_train, x_test, y_train, y_test = train_test_split(X_res, y_res, test_size = 0.2, random_state = 42)
     return x_train, x_test, y_train, y_test
 
 def data_scaler(x_train, x_test):
@@ -70,8 +57,8 @@ def data_scaler(x_train, x_test):
     return X_train_scaled, X_test_scaled, scaler
 
 def data_preprocessing(x,y):
-    X_ros, y_ros = smote(x,y)
-    x_train, x_test, y_train, y_test = split_data(X_ros, y_ros)
+    X_res, y_res = smote(x,y)
+    x_train, x_test, y_train, y_test = split_data(X_res, y_res)
     X_train_scaled, X_test_scaled, scaler = data_scaler(x_train, x_test)
     return X_train_scaled, X_test_scaled, scaler, y_train, y_test
 

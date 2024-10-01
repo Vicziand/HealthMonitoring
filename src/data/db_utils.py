@@ -26,6 +26,7 @@ def fetch_data(query):
     engine = sql_engine()
     return pd.read_sql(query, engine)
 #Az adatbázisból lekérdezett adatokat közvetlenül egy Pandas DataFrame-be töltjük be
+#data = Rawdata[['male','age','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','sysBP','diaBP','heartRate','BMI','TenYearCHD']]
 
 def create_chd_table():
     conn = db_connection()
@@ -35,7 +36,6 @@ def create_chd_table():
             id SERIAL PRIMARY KEY,
             male INTEGER,
             age INTEGER,
-            currentsmoker INTEGER,
             cigsperday INTEGER,
             bpmeds INTEGER,
             prevalentstroke INTEGER,
@@ -61,7 +61,7 @@ def clear_chd_table():
 
 def data_clean_chd():
     Rawdata = pd.read_csv("src/data/raw/training_data_chd.csv")
-    #data = Rawdata[['male','age','currentSmoker','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']]
+    #data = Rawdata[['male','age','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']]
     
     data_clean = Rawdata.copy()
 
@@ -86,18 +86,17 @@ def correlation_chd(data_clean):
     sns.heatmap(data_clean.corr(), annot = True, cmap= 'RdYlBu', fmt= '.2f');
     st.pyplot(plt)
 
-
 def data_load_chd(data):
     
     conn = db_connection()
     cur = conn.cursor()
-
+    final_data = data[['male','age','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']]
     # Minden sor beszúrása a táblába
-    for i, row in data.iterrows():
+    for i, row in final_data.iterrows():
         cur.execute("""
-            INSERT INTO chd (male, age, currentsmoker, cigsperday, bpmeds, 
+            INSERT INTO chd (male, age, cigsperday, bpmeds, 
             prevalentstroke, prevalenthyp, diabetes, heartrate, bmi, tenyearchd)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, tuple(row))
 
     conn.commit()

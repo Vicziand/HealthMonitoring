@@ -36,3 +36,12 @@ st.pyplot(plt)
 
 data = data_clean_chd()
 correlation_chd(data)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.set()
+chd_plot = data['TenYearCHD'].value_counts().plot(kind='bar', color=['#70C454', '#E74C3C'], ax=ax)
+ax.set_xlabel('TenYearCHD (0: Nem volt kardiovaszkuláris probléma, 1: Volt kardivaszkuláris probléma)', fontsize=12, labelpad=10)
+ax.set_ylabel('Darab', fontsize=12, labelpad=10)
+ax.set_xticks([0, 1])
+ax.set_xticklabels(['0', '1'], fontsize=11)
+st.pyplot(fig)

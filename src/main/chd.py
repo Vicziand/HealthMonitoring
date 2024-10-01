@@ -75,8 +75,6 @@ with form:
         min_value=0, max_value=80, value=0, step=1
     )
 
-    current_smoker_value = 0 if cigs_per_day_value == 0 else 1
-
     heart_rate_value = col3.slider(
         "Nyugalmi pulzus",
         40,
@@ -119,7 +117,6 @@ if submit_button:
     your_data = pd.DataFrame({
         'male' : [gender_value],
         'age': [age_value],
-        'currentsmoker': [current_smoker_value],
         'cigsperday' : [cigs_per_day_value],
         'bpmeds' : [bp_meds_value],
         'prevalentstroke' : [prevalent_stroke_value],
@@ -154,7 +151,7 @@ if submit_button:
 
     # Változók neveinek hozzárendelése a koefficiensekhez
     feature_importance = pd.DataFrame({
-        'Feature': ['male', 'age', 'currentsmoker', 'cigsperday', 'bpmeds', 
+        'Feature': ['male', 'age', 'cigsperday', 'bpmeds', 
                     'prevalentstroke', 'prevalenthyp', 'diabetes', 'heartrate', 'bmi'],
         'Coefficient': coef
     })
@@ -180,7 +177,7 @@ if submit_button:
     else:
         st.write("A megadott paraméterek alapján alacsony a kockázati szint.")
         st.write("Az életkor előrehaladtával növekszik a kockázat.")
-    if current_smoker_value == 1:
+    if cigs_per_day_value > 0:
             st.write("A dohányzás jelentősen növeli a szív és érrendszeri problámák kockázatát.")
     if bmi_value > 30:
             st.write("Az ön testömegindexe alapján túlsúlyos kategóriába tartozik. Az egészséges életmód és a fittség hozzájárul a kockázat csökkentéséhez.")
