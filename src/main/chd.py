@@ -25,8 +25,16 @@ X_train_scaled, X_test_scaled, scaler, y_train, y_test = data_preprocessing(x,y)
 
 models = train_models(X_train_scaled, y_train)
 
-for model in models:
-   model_accuracy(model, X_test_scaled, y_test)
+for model_name, model in models.items():
+        y_pred = model.predict(X_test_scaled)
+        y_prob = model.predict_proba(X_test_scaled)
+        chd_prob = y_prob[0][1]
+        accuracy = accuracy_score(y_test, y_pred)
+        st.write(f"A {model_name} modell pontossága: {accuracy * 100:.2f}%")
+         
+
+#for model in models:
+   #model_accuracy(model, X_test_scaled, y_test)
    
 # Zavarási mátrix és részletes elemzés
 #cm = confusion_matrix(y_test, y_pred)
@@ -127,8 +135,8 @@ if submit_button:
     })
 
     your_data_scaled = scaler.transform(your_data)
-    your_pred = models[0].predict(your_data_scaled)
-    your_prob = models[0].predict_proba(your_data_scaled)
+    your_pred = models['Random Forest'].predict(your_data_scaled)
+    your_prob = models['Random Forest'].predict_proba(your_data_scaled)
     chd_prob = your_prob[0][1]
 
     fig = go.Figure(go.Indicator(
@@ -147,21 +155,21 @@ if submit_button:
     ))
 
     # Modell koefficiensek lekérése
-    coef = models[0].coef_[0]
+    #coef = models[0].coef_[0]
 
     # Változók neveinek hozzárendelése a koefficiensekhez
-    feature_importance = pd.DataFrame({
-        'Feature': ['male', 'age', 'cigsperday', 'bpmeds', 
-                    'prevalentstroke', 'prevalenthyp', 'diabetes', 'heartrate', 'bmi'],
-        'Coefficient': coef
-    })
+    #feature_importance = pd.DataFrame({
+        #'Feature': ['male', 'age', 'cigsperday', 'bpmeds', 
+                    #'prevalentstroke', 'prevalenthyp', 'diabetes', 'heartrate', 'bmi'],
+        #'Coefficient': coef
+    #})
 
     # Koefficiensek abszolút értékének vizsgálata (hogy jobban lássuk a súlyozást)
-    feature_importance['Abs_Coefficient'] = np.abs(feature_importance['Coefficient'])
-    feature_importance = feature_importance.sort_values(by='Abs_Coefficient', ascending=False)
+    #feature_importance['Abs_Coefficient'] = np.abs(feature_importance['Coefficient'])
+    #feature_importance = feature_importance.sort_values(by='Abs_Coefficient', ascending=False)
 
     # Eredmények megjelenítése
-    print(feature_importance)
+    #print(feature_importance)
 
     st.plotly_chart(fig)
 

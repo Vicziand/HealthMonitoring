@@ -106,9 +106,19 @@ def train_models(X_train_scaled, y_train):
     XGBModel = train_xgboost(X_train_scaled, y_train)
     KNNModel = train_KNN(X_train_scaled, y_train)
     SVMModel = train_SVM(X_train_scaled, y_train)
-    return [LogRegModel, RFModel, XGBModel, KNNModel,SVMModel]
+    
+    models = {
+        'Logisztikus Regresszió': LogRegModel,
+        'Random Forest': RFModel,
+        'XGBoost': XGBModel,
+        'K-Nearest Neighbor': KNNModel,
+        'Support Vector Machine' : SVMModel
+    }
+    
+    return models
 
 def model_accuracy(model, X_test_scaled, y_test):
+    
     y_pred = model.predict(X_test_scaled)
 
     #st.write(y_pred)
