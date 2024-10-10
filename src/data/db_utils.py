@@ -10,6 +10,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 #sns.set_style('darkgrid')
+import bcrypt
 
 def db_connection():
     return psycopg2.connect(
@@ -181,3 +182,98 @@ def prepare_sleep_data():
     clear_sleep_table()
     data = data_clean_sleep()
     data_load_sleep(data)
+    
+def create_users_table():
+    conn = db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        userProfileId BIGINT PRIMARY KEY,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL
+    );
+    """)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def hash_password(password):
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed_password
+    
+def register_user(email, password, user_profile_id):
+    conn = db_connection()
+    cur = conn.cursor()
+
+    try:
+        hashed_password = hash_password(password)
+        cur.execute("INSERT INTO users (email, password_hash, userProfileId) VALUES (%s, %s, %s)", (email, hashed_password, user_profile_id))
+        conn.commit()
+    except psycopg2.IntegrityError:
+        print("Ez az email cím már regisztrálva van.")
+        conn.rollback()
+        return False
+    finally:
+        cur.close()
+        conn.close()
+    
+    return True
+
+def create_activities_table():
+    conn = db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS activities (
+            id SERIAL PRIMARY KEY,
+            totalSteps INTEGER,
+            averageStressLevel INTEGER,
+            sleepingSeconds INTEGER,
+            activeSeconds INTEGER,
+            sleepQuality INTEGER,
+            userProfileId BIGINT NOT NULL,
+            FOREIGN KEY (userProfileId) REFERENCES users(userProfileId)
+        );
+    """)
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+def create_heartrate_table():
+    conn = db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS heartrates (
+            id SERIAL PRIMARY KEY,
+            timestamp BIGINT,
+            heartrate INTEGER,
+            userProfileId BIGINT NOT NULL,
+            FOREIGN KEY (userProfileId) REFERENCES users(userProfileId)
+        );
+    """)
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def save_heart_rate_data(timestamp, heartrate, userProfileId):
+    conn = db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("INSERT INTO heartrates (timestamp, heartrate, userProfileId) VALUES (%s, %s, %s)",
+                (timestamp, heartrate, userProfileId))
+        
+        conn.commit()
+    except Exception as e:
+        print(f"Hiba történt az adat mentésekor: {e}")
+        conn.rollback()
+        
+    finally:
+        cur.close()
+        conn.close()
+    
