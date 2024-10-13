@@ -48,8 +48,8 @@ with form:
 
     age_value = col1.slider(
         "Életkor",
-        16,
-        100,
+        18,
+        80,
         key = "age",
     )
 
@@ -64,14 +64,14 @@ with form:
 
     height_value = col2.slider(
         "Magasság (cm)",
-        130,
-        220,
+        160,
+        200,
         key = "height"
     )
 
     weight_value = col3.slider(
         "Súly (kg)",
-        20,
+        40,
         250,
         key = "weight",
     )
@@ -86,7 +86,7 @@ with form:
     heart_rate_value = col3.slider(
         "Nyugalmi pulzus",
         40,
-        100,
+        120,
         key = "heart_rate"
     )
 

@@ -235,6 +235,7 @@ def create_activities_table():
             activeSeconds INTEGER,
             sleepQuality INTEGER,
             userProfileId BIGINT NOT NULL,
+            calendarDate DATE UNIQUE,
             FOREIGN KEY (userProfileId) REFERENCES users(userProfileId)
         );
     """)
@@ -276,4 +277,19 @@ def save_heart_rate_data(timestamp, heartrate, userProfileId):
     finally:
         cur.close()
         conn.close()
+
+def save_activities_data(totalSteps,averageStressLevel,sleepingSeconds,activeSeconds,sleepQuality,userProfileId, calendarDate):
+    conn = db_connection()
+    cur = conn.cursor()
     
+    try:
+        cur.execute("INSERT INTO activities (totalSteps, averageStressLevel, sleepingSeconds, activeSeconds, sleepQuality, userProfileId, calendarDate) VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT (calendarDate) DO NOTHING",
+                    (totalSteps, averageStressLevel, sleepingSeconds, activeSeconds, sleepQuality, userProfileId, calendarDate))
+        conn.commit()
+    except Exception as e:
+        print(f"Hiba történt az adat mentésekor: {e}")
+        conn.rollback()
+    
+    finally:
+        cur.close()
+        conn.close()

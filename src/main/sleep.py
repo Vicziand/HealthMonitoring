@@ -15,7 +15,7 @@ X_train_scaled, X_test_scaled, scaler, y_train, y_test = sleep_data_preprocessin
 
 LogRegModel = train_log_reg(X_train_scaled, y_train)
 RFModel = train_random_forest(X_train_scaled, y_train)
-model_accuracy(RFModel, X_test_scaled, y_test)
+model_accuracy(LogRegModel, X_test_scaled, y_test)
 
 st.write(data)
 

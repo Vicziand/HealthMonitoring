@@ -53,7 +53,28 @@ def garmin_login(email, password):
                         print(f"Nem várt formátum: {record}")
         else:
                 print(f"Nem érkezett adat.")
-    
+                
+        for date in date_range:
+            create_activities_table()
+            sleep_data = client.get_sleep_data(date.isoformat())
+            activity_data = client.get_stats(date.isoformat())
+            userProfileId = activity_data.get('userProfileId', [])
+            totalSteps = activity_data.get('totalSteps', [])
+            averageStressLevel = activity_data.get('averageStressLevel', [])
+            sleepingSeconds = activity_data.get('sleepingSeconds', [])
+            activeSeconds = activity_data.get('activeSeconds', [])
+            sleepQuality = None
+            if 'dailySleepDTO' in sleep_data and 'sleepScores' in sleep_data['dailySleepDTO']:
+                sleepQuality = sleep_data['dailySleepDTO']['sleepScores']['overall'].get('value', None)
+            calendar_date_str = activity_data.get('calendarDate', [])
+            calendarDate = datetime.datetime.strptime(calendar_date_str, '%Y-%m-%d').date()
+            
+            if None in [userProfileId, totalSteps, averageStressLevel, sleepingSeconds, activeSeconds, sleepQuality, calendarDate]:
+        
+                continue
+            
+            save_activities_data(totalSteps,averageStressLevel,sleepingSeconds,activeSeconds,sleepQuality,userProfileId,calendarDate)
+        
         return True
     
     except (

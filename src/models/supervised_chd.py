@@ -63,12 +63,12 @@ def data_preprocessing(x,y):
     return X_train_scaled, X_test_scaled, scaler, y_train, y_test
 
 def train_log_reg(X_train_scaled, y_train):
-    LogRegModel = LogisticRegression(max_iter = 1000, class_weight='balanced')
+    LogRegModel = LogisticRegression()
     LogRegModel.fit(X_train_scaled, y_train.values.ravel())
     return LogRegModel
 
 def train_random_forest(X_train_scaled, y_train):
-    RFModel = RandomForestClassifier(n_estimators=100, random_state=0, class_weight='balanced')
+    RFModel = RandomForestClassifier(n_estimators=200, random_state=42, max_depth= 80, min_samples_split= 8)
     RFModel.fit(X_train_scaled, y_train.values.ravel())
     return RFModel
 
