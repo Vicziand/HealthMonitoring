@@ -73,30 +73,18 @@ def train_random_forest(X_train_scaled, y_train):
     return RFModel
 
 def train_xgboost(X_train_scaled, y_train):
-    XGBModel = xgb.XGBClassifier(colsample_bytree= 0.6,
-                                 eval_metric= 'logloss',
-                                 gamma= 2,
-                                 learning_rate= 0.1,
-                                 max_depth= 5,
-                                 min_child_weight= 1,
-                                 subsample= 0.8,
-                                 use_label_encoder=False,
-                                 verbosity = 0)
+    XGBModel = xgb.XGBClassifier(colsample_bytree = 0.8, eval_metric = 'logloss', n_estimators = 200, learning_rate = 0.4, max_depth = 5, subsample = 0.8)
     XGBModel.fit(X_train_scaled, y_train.values.ravel())
     return XGBModel
 
 def train_KNN(X_train_scaled, y_train):
-    param_grid = {'n_neighbors': range(1, 10)}
-    grid_search = GridSearchCV(KNeighborsClassifier(), param_grid, cv=5)
-    grid_search.fit(X_train_scaled, y_train.values.ravel())
-
-    print("Legjobb paraméterek:", grid_search.best_params_)
-    KNN = KNeighborsClassifier(n_neighbors=3, weights='distance')
+    
+    KNN = KNeighborsClassifier(n_neighbors=3, weights='distance', metric='minkowski' )
     KNN.fit(X_train_scaled, y_train.values.ravel())
     return KNN
 
 def train_SVM(X_train_scaled, y_train):
-    SVMModel = svm.SVC(probability=True, kernel='rbf', C=1.0, gamma='scale')
+    SVMModel = svm.SVC(probability=True, kernel='rbf', C=10, gamma='scale')
     SVMModel.fit(X_train_scaled, y_train.values.ravel())
     return SVMModel
 
