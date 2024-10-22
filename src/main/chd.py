@@ -22,25 +22,11 @@ from data.db_utils import *
 prepare_chd_data()
 x,y = create_chd_variables()
 X_train_scaled, X_test_scaled, scaler, y_train, y_test = data_preprocessing(x,y)
-
-models = train_models(X_train_scaled, y_train)
-
-for model_name, model in models.items():
-        y_pred = model.predict(X_test_scaled)
-        y_prob = model.predict_proba(X_test_scaled)
-        chd_prob = y_prob[0][1]
-        accuracy = accuracy_score(y_test, y_pred)
-        st.write(f"A {model_name} modell pontossága: {accuracy * 100:.2f}%")
+is_chd = True
+models = train_models(X_train_scaled, y_train, is_chd)
+st.title("Predikció szívkoszorúér-betegség kockázatának előrejelzésére")
+st.write("Kérem jelölje a megfelelő adatokat! Amennyiben a megadott intervallumon kívül esik az érték, a legközelebbi szélsőértéket adja meg. ")
          
-
-#for model in models:
-   #model_accuracy(model, X_test_scaled, y_test)
-   
-# Zavarási mátrix és részletes elemzés
-#cm = confusion_matrix(y_test, y_pred)
-#st.write(f"Zavarási mátrix:\n{cm}")
-#st.write(classification_report(y_test, y_pred))
-
 form = st.form(key="form_settings")
 col1, col2, col3 = form.columns([1, 2, 2])
 
@@ -122,7 +108,7 @@ with form:
 
 if submit_button:
 
-    your_data = pd.DataFrame({
+    user_data = pd.DataFrame({
         'male' : [gender_value],
         'age': [age_value],
         'cigsperday' : [cigs_per_day_value],
@@ -134,10 +120,10 @@ if submit_button:
         'bmi': [bmi_value]
     })
 
-    your_data_scaled = scaler.transform(your_data)
-    your_pred = models['Random Forest'].predict(your_data_scaled)
-    your_prob = models['Random Forest'].predict_proba(your_data_scaled)
-    chd_prob = your_prob[0][1]
+    user_data_scaled = scaler.transform(user_data)
+    user_pred = models['Random Forest'].predict(user_data_scaled)
+    user_prob = models['Random Forest'].predict_proba(user_data_scaled)
+    chd_prob = user_prob[0][1]
 
     fig = go.Figure(go.Indicator(
         mode = "gauge+number",
@@ -154,38 +140,21 @@ if submit_button:
         }
     ))
 
-    # Modell koefficiensek lekérése
-    #coef = models[0].coef_[0]
-
-    # Változók neveinek hozzárendelése a koefficiensekhez
-    #feature_importance = pd.DataFrame({
-        #'Feature': ['male', 'age', 'cigsperday', 'bpmeds', 
-                    #'prevalentstroke', 'prevalenthyp', 'diabetes', 'heartrate', 'bmi'],
-        #'Coefficient': coef
-    #})
-
-    # Koefficiensek abszolút értékének vizsgálata (hogy jobban lássuk a súlyozást)
-    #feature_importance['Abs_Coefficient'] = np.abs(feature_importance['Coefficient'])
-    #feature_importance = feature_importance.sort_values(by='Abs_Coefficient', ascending=False)
-
-    # Eredmények megjelenítése
-    #print(feature_importance)
-
     st.plotly_chart(fig)
-
-    print(f"Saját predikált koronária szívbetegség valószínűsége (CHD): {your_prob[0][1]:.2f}")
-    print(f"Saját predikált koronária kockázat (TenYearCHD): {your_pred[0]}")
     
+ # Kockázati szint kiírása
     if chd_prob * 100 > 50:
-        st.write("A megadott paraméterek alapján magas a kockázati szint.")
-        st.write("Az életkor előrehaladtával növekszik a kockázat.")
+        risk_level = "magas"
     elif chd_prob * 100 > 25:
-        st.write("A megadott paraméterek alapján mérsékelt a kockázati szint.")
-        st.write("Az életkor előrehaladtával növekszik a kockázat.")
+        risk_level = "mérsékelt"
     else:
-        st.write("A megadott paraméterek alapján alacsony a kockázati szint.")
-        st.write("Az életkor előrehaladtával növekszik a kockázat.")
+        risk_level = "alacsony"
+
+    st.write(f"A megadott paraméterek alapján {risk_level} a kockázati szint.")
+    st.write("Az életkor előrehaladtával növekszik a kockázat.")
+
+# Dohányzás és BMI értékelés
     if cigs_per_day_value > 0:
-            st.write("A dohányzás jelentősen növeli a szív és érrendszeri problámák kockázatát.")
+        st.write("A dohányzás jelentősen növeli a szív és érrendszeri problémák kockázatát.")
     if bmi_value > 30:
-            st.write("Az ön testömegindexe alapján túlsúlyos kategóriába tartozik. Az egészséges életmód és a fittség hozzájárul a kockázat csökkentéséhez.")
+        st.write("Az ön testömegindexe alapján túlsúlyos kategóriába tartozik. Az egészséges életmód és a fittség hozzájárul a kockázat csökkentéséhez.")

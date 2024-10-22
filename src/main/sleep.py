@@ -13,17 +13,15 @@ prepare_sleep_data()
 x,y = create_sleep_variables()
 X_train_scaled, X_test_scaled, scaler, y_train, y_test = sleep_data_preprocessing(x,y)
 
-LogRegModel = train_log_reg(X_train_scaled, y_train)
-RFModel = train_random_forest(X_train_scaled, y_train)
-model_accuracy(LogRegModel, X_test_scaled, y_test)
-
-st.write(data)
-
+SVMModel = train_SVM(X_train_scaled, y_train)
+model_accuracy(SVMModel, X_test_scaled, y_test)
+st.title("Alvási rendellenesség felismerés")
+st.write("Kérem jelölje a megfelelő adatokat! Amennyiben a megadott intervallumon kívül esik az érték, a legközelebbi szélsőértéket adja meg. ")
 form = st.form(key="form_settings")
 col1, col2, col3 = form.columns([1, 2, 2])
 
 with form:
-
+    
     gender_options = ["férfi","nő"] 
     gender = col1.radio(
         "Neme",
@@ -72,14 +70,14 @@ with form:
     
     height_value = col2.slider(
         "Magasság (cm)",
-        130,
-        220,
+        160,
+        200,
         key = "height"
     )
     
     weight_value = col3.slider(
         "Súly (kg)",
-        20,
+        40,
         250,
         key = "weight",
     )
@@ -101,12 +99,11 @@ with form:
         key = "steps"
     )
     
-
     submit_button = st.form_submit_button(label="Elküld")
     
 if submit_button:
 
-    your_data = pd.DataFrame({
+    user_data = pd.DataFrame({
     'gender' : [gender_value],
     'age': [age_value],
     'duration': [duration_value],
@@ -118,14 +115,14 @@ if submit_button:
     'steps': [steps_value],
     })
     
-    your_data_scaled = scaler.transform(your_data)
-    your_pred = RFModel.predict(your_data_scaled)
+    user_data_scaled = scaler.transform(user_data)
+    user_pred = SVMModel.predict(user_data_scaled)
 
-    if your_pred == 0:
+    if user_pred == 0:
         st.write("Nincs rendellenesség!")
-    elif your_pred == 1:
+    elif user_pred == 1:
         st.write("Alvási apnoé")
     else:
         st.write("Insomnia")
     
-    print(your_pred)
+    print(user_pred)

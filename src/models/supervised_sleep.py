@@ -11,7 +11,7 @@ def create_sleep_variables():
        "bmi", "heartrate", "steps", "disorder"
     FROM sleep;
     """ 
-    data = pd.read_sql(query, conn)
+    data = db_utils.fetch_data(query)
     conn.close()
     
     # Független változók

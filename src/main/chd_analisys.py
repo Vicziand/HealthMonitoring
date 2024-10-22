@@ -4,7 +4,8 @@ import sweetviz as sv
 import ydata_profiling as pp
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import roc_curve, auc, accuracy_score
+from sklearn.metrics import roc_curve, auc, accuracy_score, precision_score, recall_score, f1_score
+import numpy as np
 
 import sys
 # Hozzáadjuk a könyvtárat az elérési úthoz
@@ -12,21 +13,22 @@ sys.path.append('I:/NJE-GAMF/Szakdolgozat/HealthMonitoring/src')
 from models.supervised_chd import *
 from data.db_utils import *
 
-
 Rawdata = pd.read_csv("src/data/raw/training_data_chd.csv")
-
-
 
 missing_columns = Rawdata.select_dtypes(include='number').columns[Rawdata.isnull().any()]
 missing_data = Rawdata[missing_columns]
 
+data = data_clean_chd()
+st.write("Tanító adatbázis")
+st.write(data)
 
 sns.set(rc={'figure.figsize':(15,5)})
 ax=sns.boxplot(data=missing_data)
 ax.set_xticklabels(ax.get_xticklabels(),rotation=45)
+st.write("Kiugró értékek")
 st.pyplot(plt)
 
-data = data_clean_chd()
+st.write("Korrelációs mátrix")
 correlation_chd(data)
 
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -36,16 +38,20 @@ ax.set_xlabel('TenYearCHD (0: Nem volt kardiovaszkuláris probléma, 1: Volt kar
 ax.set_ylabel('Darab', fontsize=12, labelpad=10)
 ax.set_xticks([0, 1])
 ax.set_xticklabels(['0', '1'], fontsize=11)
+st.write("Eloszlás vizsgálat")
 st.pyplot(fig)
 
 prepare_chd_data()
 x,y = create_chd_variables()
 X_train_scaled, X_test_scaled, scaler, y_train, y_test = data_preprocessing(x,y)
-
-models = train_models(X_train_scaled, y_train)
+is_chd = True
+models = train_models(X_train_scaled, y_train, is_chd)
 
 roc_data = {}
 accuracy_data = {}
+precision_data = {}
+recall_data = {}
+f1_data = {}
 
 for model_name, model in models.items():
     if hasattr(model, "predict_proba"):
@@ -54,23 +60,69 @@ for model_name, model in models.items():
         auc_value = auc(fpr, tpr)
         roc_data[model_name] = (fpr, tpr, auc_value)
     
-    
     y_pred = model.predict(X_test_scaled)
     accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, average='weighted')
+    recall = recall_score(y_test, y_pred, average='weighted')
+    f1 = f1_score(y_test, y_pred, average='weighted')
     accuracy_data[model_name] = accuracy
+    precision_data[model_name] = precision
+    recall_data[model_name] = recall
+    f1_data[model_name] = f1
 
 # Accuracy ábrázolás oszlopdiagram
+st.write("Accuracy")
 plt.figure(figsize=(10, 6))
-plt.bar(accuracy_data.keys(), accuracy_data.values(), color=['blue', 'orange', 'green', 'red', 'purple'])
+bars = plt.bar(accuracy_data.keys(), accuracy_data.values(), color=['blue', 'orange', 'green', 'red', 'purple'])
 plt.xlabel('Modellek')
 plt.ylabel('Pontosság (Accuracy)')
 plt.title('Modellek pontosságának összehasonlítása')
 plt.ylim([0, 1])
 plt.xticks(rotation=45)
 
+for bar in bars:
+    yval = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width() / 2, yval + 0.01, f'{yval:.2%}', ha='center', va='bottom')
+
 st.pyplot(plt)
 
+# Precision, Recall és F1-score ábrázolása
+metrics = ['Precision', 'Recall', 'F1-score']
+x = np.arange(len(models))
+width = 0.2
+
+st.write("Precision,Recall, F1-score")
+plt.figure(figsize=(12, 6))
+precision_values = [precision_data.get(m, 0) for m in models.keys()]
+recall_values = [recall_data.get(m, 0) for m in models.keys()]
+f1_values = [f1_data.get(m, 0) for m in models.keys()]
+
+bars1 = plt.bar(x - width, precision_values, width, label='Precision', color='blue')
+bars2 = plt.bar(x, recall_values, width, label='Recall', color='orange')
+bars3 = plt.bar(x + width, f1_values, width, label='F1-score', color='green')
+
+plt.xlabel('Modellek')
+plt.ylabel('Értékek')
+plt.title('Precision, Recall és F1-score összehasonlítása modellekenként')
+plt.xticks(x, models.keys(), rotation=45)
+plt.ylim([0, 1])
+
+plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.15), ncol=3)
+
+for bar in bars1:
+    plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{bar.get_height():.2f}', ha='center', va='bottom')
+
+for bar in bars2:
+    plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{bar.get_height():.2f}', ha='center', va='bottom')
+
+for bar in bars3:
+    plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{bar.get_height():.2f}', ha='center', va='bottom')
+
+st.pyplot(plt)
+
+
 # ROC ábrázolás
+st.write("ROC-görbe")
 plt.figure()
 for model_name, (fpr, tpr, auc_value) in roc_data.items():
     plt.plot(fpr, tpr, label=f'{model_name} (AUC = {auc_value:.2f})')
@@ -79,9 +131,9 @@ for model_name, (fpr, tpr, auc_value) in roc_data.items():
 plt.plot([0, 1], [0, 1], color='gray', linestyle='--') 
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate (FPR)')
-plt.ylabel('True Positive Rate (TPR)')
-plt.title('ROC Curve Comparison for Multiple Models')
+plt.xlabel('Hamis pozitív arány')
+plt.ylabel('Valódi pozitív arány')
+plt.title('ROC görbe összehasonlítása a modelleken')
 plt.legend(loc="lower right")
 
 

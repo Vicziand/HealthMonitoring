@@ -21,7 +21,7 @@ def db_connection():
     )
     
 def sql_engine():
-    return create_engine('postgresql://postgres:Healthdb@localhost/health_monitor')
+    return create_engine('postgresql+psycopg2://postgres:Healthdb@localhost/health_monitor')
 
 def fetch_data(query):
     engine = sql_engine()
@@ -62,7 +62,6 @@ def clear_chd_table():
 
 def data_clean_chd():
     Rawdata = pd.read_csv("src/data/raw/training_data_chd.csv")
-    #data = Rawdata[['male','age','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']]
     
     data_clean = Rawdata.copy()
 
@@ -78,7 +77,7 @@ def data_clean_chd():
                                                  index=data_clean.index)
     # Ellenőrzés, hogy sikerült-e a hiányzó adatok kitöltése
     print(data_clean.isnull().sum())
-    st.write(data_clean)
+    
     
     return data_clean
 
@@ -141,22 +140,30 @@ def clear_sleep_table():
     conn.close()
     
 def data_clean_sleep():
+    # Az adat beolvasása
     Rawdata = pd.read_csv("src/data/raw/training_data_sleep.csv")
 
-    data = Rawdata[['Gender','Age','Sleep Duration','Quality of Sleep','Physical Activity Level','Stress Level','BMI Category','Heart Rate','Daily Steps','Sleep Disorder']]
-    data['Sleep Disorder'].fillna('None', inplace=True)
-    data['BMI Category']=data['BMI Category'].replace({'Normal Weight':'Normal'})
+    # Csak a szükséges oszlopok kiválasztása és másolat készítése
+    data = Rawdata[['Gender', 'Age', 'Sleep Duration', 'Quality of Sleep', 'Physical Activity Level', 
+                    'Stress Level', 'BMI Category', 'Heart Rate', 'Daily Steps', 'Sleep Disorder']].copy()
 
+    # Hiányzó értékek kezelése
+    data['Sleep Disorder'].fillna('None', inplace=True)
+    data['BMI Category'] = data['BMI Category'].replace({'Normal Weight': 'Normal'})
+
+    # Encoderek
     label_encoder_gender = LabelEncoder()
     encoder_disorder = OrdinalEncoder(categories=[['None', 'Sleep Apnea', 'Insomnia']])
     encoder_bmi = OrdinalEncoder(categories=[['Normal', 'Overweight', 'Obese']])
     data['gender'] = label_encoder_gender.fit_transform(data['Gender'])
-    
+    # Az encoderek alkalmazása
     data['disorder'] = encoder_disorder.fit_transform(data[['Sleep Disorder']])
     data['bmi'] = encoder_bmi.fit_transform(data[['BMI Category']])
     data['gender'] = label_encoder_gender.fit_transform(data['Gender'])
     
-    return data
+    numeric_data = data.drop(columns=['Gender', 'BMI Category', 'Sleep Disorder'])
+
+    return numeric_data
 
 def data_load_sleep(data):
     conn = db_connection()
