@@ -9,7 +9,6 @@ from sklearn.impute import SimpleImputer
 import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
-#sns.set_style('darkgrid')
 import bcrypt
 
 def db_connection():
@@ -26,8 +25,6 @@ def sql_engine():
 def fetch_data(query):
     engine = sql_engine()
     return pd.read_sql(query, engine)
-#Az adatbázisból lekérdezett adatokat közvetlenül egy Pandas DataFrame-be töltjük be
-#data = Rawdata[['male','age','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','sysBP','diaBP','heartRate','BMI','TenYearCHD']]
 
 def create_chd_table():
     conn = db_connection()

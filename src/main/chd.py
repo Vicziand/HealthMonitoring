@@ -13,9 +13,10 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 
+import os
 import sys
-# Hozzáadjuk a könyvtárat az elérési úthoz
-sys.path.append('I:/NJE-GAMF/Szakdolgozat/HealthMonitoring/src')
+# A könyvtár relatív elérési útja
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from models.supervised_chd import *
 from data.db_utils import *
 
@@ -24,7 +25,7 @@ x,y = create_chd_variables()
 X_train_scaled, X_test_scaled, scaler, y_train, y_test = data_preprocessing(x,y)
 is_chd = True
 models = train_models(X_train_scaled, y_train, is_chd)
-st.title("Predikció szívkoszorúér-betegség kockázatának előrejelzésére")
+st.title("💓 Szívkoszorúér-betegség kockázatának előrejelzése")
 st.write("Kérem jelölje a megfelelő adatokat! Amennyiben a megadott intervallumon kívül esik az érték, a legközelebbi szélsőértéket adja meg. ")
          
 form = st.form(key="form_settings")
@@ -142,7 +143,7 @@ if submit_button:
 
     st.plotly_chart(fig)
     
- # Kockázati szint kiírása
+ # Kockázati szint meghatározása
     if chd_prob * 100 > 50:
         risk_level = "magas"
     elif chd_prob * 100 > 25:
@@ -150,11 +151,23 @@ if submit_button:
     else:
         risk_level = "alacsony"
 
-    st.write(f"A megadott paraméterek alapján {risk_level} a kockázati szint.")
-    st.write("Az életkor előrehaladtával növekszik a kockázat.")
+# Kiírandó üzenetek listába rendezése
+    messages = [
+        f"A megadott paraméterek alapján {risk_level} a kockázati szint.",
+        "Az életkor előrehaladtával növekszik a kockázat."
+    ]
 
-# Dohányzás és BMI értékelés
     if cigs_per_day_value > 0:
-        st.write("A dohányzás jelentősen növeli a szív és érrendszeri problémák kockázatát.")
+        messages.append("A dohányzás jelentősen növeli a szív és érrendszeri problémák kockázatát.")
     if bmi_value > 30:
-        st.write("Az ön testömegindexe alapján túlsúlyos kategóriába tartozik. Az egészséges életmód és a fittség hozzájárul a kockázat csökkentéséhez.")
+        messages.append("Az ön testömegindexe alapján túlsúlyos kategóriába tartozik. Az egészséges életmód és a fittség hozzájárul a kockázat csökkentéséhez.")
+
+    st.markdown("""
+    <div style="text-align: center;">
+        <ul style="list-style-position: inside;">
+    """, unsafe_allow_html=True)
+
+    for message in messages:
+        st.markdown(f"<li>{message}</li>", unsafe_allow_html=True)
+
+    st.markdown("</ul></div>", unsafe_allow_html=True)

@@ -1,14 +1,17 @@
 import streamlit as st
 from st_pages import Page, Section, add_page_title, hide_pages
+st.set_page_config(layout="wide")
 from auth.auth import *
 from main.garmin import *
+
+
 
 home = st.Page("main/home.py", title="Főoldal", icon="🏠")
 chd = st.Page("main/chd.py", title="Szívkoszorúér-betegség kockázat", icon="💓")
 chd_analizys = st.Page("main/chd_analisys.py", title="Analízis", icon="📊")
 sleep = st.Page("main/sleep.py", title="Alvás figyelés", icon="💤")
 sleep_analizys = st.Page("main/sleep_analisys.py", title="Analízis", icon="📊")
-garmin = st.Page("main/garmin.py", title="Garmin Connect", icon="⌚️")
+garmin_connect = st.Page("main/garmin_connect.py", title="Garmin Connect", icon="⌚️")
 login_page = st.Page("main/login.py", title="Bejelentkezés", icon="🔑")
 
 
@@ -23,15 +26,15 @@ if st.session_state["authenticated"]:
             "Főoldal": [home],
             "Szívkoszorúér-betegség": [chd, chd_analizys],
             "Alvás figyelés": [sleep, sleep_analizys],
-            "Saját adat": [garmin]
+            "Saját adat": [garmin_connect]
         }
     )
-    
-    show_data()
 
     if st.sidebar.button("Kijelentkezés"):
         st.session_state["authenticated"] = False
         st.session_state["page"] = "Főoldal"
+        
+    show_data()
 
 else:
     # Bejelentkezés előtti menü

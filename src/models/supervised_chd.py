@@ -14,6 +14,7 @@ from sklearn import svm
 from sklearn.model_selection import GridSearchCV
 
 
+
 def create_chd_variables():
     
     conn = db_utils.db_connection()

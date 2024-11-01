@@ -1,8 +1,8 @@
-import streamlit as st
+
+import os
 import sys
-# Hozzáadjuk a könyvtárat az elérési úthoz
-sys.path.append('I:/NJE-GAMF/Szakdolgozat/HealthMonitoring/src')
+# A könyvtár relatív elérési útja
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from auth.auth import *
 
-st.title("Bejelentkezés oldal")
 login()
