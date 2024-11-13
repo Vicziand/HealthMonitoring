@@ -52,7 +52,6 @@ def create_chd_table():
     conn.commit()
     cur.close()
     conn.close()
-    print("create_chd_table")
     
 def clear_chd_table():
     conn = db_connection()
@@ -61,8 +60,6 @@ def clear_chd_table():
     conn.commit()
     cur.close()
     conn.close()
-    print("clear_chd_table")
-
 
 def data_clean_chd():
     Rawdata = pd.read_csv("src/data/raw/training_data_chd.csv")
@@ -79,7 +76,6 @@ def data_clean_chd():
     data_clean[remaining_columns] = pd.DataFrame(si_mean.fit_transform(data_clean[remaining_columns]), 
                                                  columns=remaining_columns, 
                                                  index=data_clean.index)
-    print("data_clean_chd")
     return data_clean
     
 

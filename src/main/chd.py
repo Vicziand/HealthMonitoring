@@ -10,7 +10,6 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import statsmodels.api as sm
 from imblearn.over_sampling import SMOTE
 import matplotlib.pyplot as plt
-import tensorflow as tf
 
 
 import os

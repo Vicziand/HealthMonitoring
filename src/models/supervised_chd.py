@@ -9,7 +9,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import xgboost as xgb
 from data import db_utils
-import tensorflow as tf
 from sklearn import svm
 from sklearn.model_selection import GridSearchCV
 
