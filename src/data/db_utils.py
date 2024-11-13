@@ -11,16 +11,21 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import bcrypt
 
+db_config = st.secrets["database"]
+
 def db_connection():
     return psycopg2.connect(
-        dbname="health_monitor",
-        user="postgres",
-        password="Healthdb",
-        host="localhost"
+        dbname=db_config["name"],
+        user=db_config["user"],
+        password=db_config["password"],
+        host=db_config["host"],
+        port=db_config["port"]
     )
     
 def sql_engine():
-    return create_engine('postgresql+psycopg2://postgres:Healthdb@localhost/health_monitor')
+    return create_engine(
+        f'postgresql+psycopg2://{db_config["user"]}:{db_config["password"]}@{db_config["host"]}:{db_config["port"]}/{db_config["name"]}'
+    )
 
 def fetch_data(query):
     engine = sql_engine()
@@ -47,6 +52,7 @@ def create_chd_table():
     conn.commit()
     cur.close()
     conn.close()
+    print("create_chd_table")
     
 def clear_chd_table():
     conn = db_connection()
@@ -55,6 +61,7 @@ def clear_chd_table():
     conn.commit()
     cur.close()
     conn.close()
+    print("clear_chd_table")
 
 
 def data_clean_chd():
@@ -72,11 +79,9 @@ def data_clean_chd():
     data_clean[remaining_columns] = pd.DataFrame(si_mean.fit_transform(data_clean[remaining_columns]), 
                                                  columns=remaining_columns, 
                                                  index=data_clean.index)
-    # Ellenőrzés, hogy sikerült-e a hiányzó adatok kitöltése
-    print(data_clean.isnull().sum())
-    
-    
+    print("data_clean_chd")
     return data_clean
+    
 
 def correlation_chd(data_clean):
     plt.figure(figsize= (16, 8))
@@ -84,18 +89,21 @@ def correlation_chd(data_clean):
     st.pyplot(plt)
 
 def data_load_chd(data):
-    
     conn = db_connection()
     cur = conn.cursor()
-    final_data = data[['male','age','cigsPerDay','BPMeds','prevalentStroke','prevalentHyp','diabetes','heartRate','BMI','TenYearCHD']]
-    # Minden sor beszúrása a táblába
-    for i, row in final_data.iterrows():
-        cur.execute("""
-            INSERT INTO chd (male, age, cigsperday, bpmeds, 
-            prevalentstroke, prevalenthyp, diabetes, heartrate, bmi, tenyearchd)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, tuple(row))
-
+    final_data = data[['male', 'age', 'cigsPerDay', 'BPMeds', 'prevalentStroke', 'prevalentHyp', 'diabetes', 'heartRate', 'BMI', 'TenYearCHD']]
+    # Az adatok listává alakítása
+    insert_values = [tuple(row) for _, row in final_data.iterrows()]
+    # SQL lekérdezés létrehozása az összes sor beszúrására
+    values_str = ', '.join(cur.mogrify("(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", row).decode('utf-8') for row in insert_values)
+    insert_query = f"""
+        INSERT INTO chd (male, age, cigsperday, bpmeds, prevalentstroke, prevalenthyp, diabetes, heartrate, bmi, tenyearchd)
+        VALUES {values_str}
+    """
+    # Lekérdezés végrehajtása
+    cur.execute(insert_query)
+    
+    
     conn.commit()
     cur.close()
     conn.close()
@@ -266,12 +274,12 @@ def create_heartrate_table():
     cur.close()
     conn.close()
 
-def save_heart_rate_data(timestamp, heartrate, userProfileId):
+def save_heart_rate_data(records):
     conn = db_connection()
     cur = conn.cursor()
     try:
         cur.execute("INSERT INTO heartrates (timestamp, heartrate, userProfileId) VALUES (%s, %s, %s)",
-                (timestamp, heartrate, userProfileId))
+                records)
         
         conn.commit()
     except Exception as e:
@@ -282,13 +290,13 @@ def save_heart_rate_data(timestamp, heartrate, userProfileId):
         cur.close()
         conn.close()
 
-def save_activities_data(totalSteps,averageStressLevel,sleepingSeconds,activeSeconds,sleepQuality,userProfileId, calendarDate):
+def save_activities_data(records):
     conn = db_connection()
     cur = conn.cursor()
     
     try:
-        cur.execute("INSERT INTO activities (totalSteps, averageStressLevel, sleepingSeconds, activeSeconds, sleepQuality, userProfileId, calendarDate) VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT (calendarDate) DO NOTHING",
-                    (totalSteps, averageStressLevel, sleepingSeconds, activeSeconds, sleepQuality, userProfileId, calendarDate))
+        cur.executemany("INSERT INTO activities (totalSteps, averageStressLevel, sleepingSeconds, activeSeconds, sleepQuality, userProfileId, calendarDate) VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT (calendarDate) DO NOTHING",
+                    records)
         conn.commit()
     except Exception as e:
         print(f"Hiba történt az adat mentésekor: {e}")

@@ -1,5 +1,4 @@
 import streamlit as st
-
 import os
 import sys
 # A könyvtár relatív elérési útja

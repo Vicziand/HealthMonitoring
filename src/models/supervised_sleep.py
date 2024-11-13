@@ -3,7 +3,6 @@ import streamlit as st
 from data import db_utils
 from models.supervised_chd import *
 
-
 def create_sleep_variables():
     
     conn = db_utils.db_connection()

@@ -1,6 +1,6 @@
 import streamlit as st
 from st_pages import Page, Section, add_page_title, hide_pages
-st.set_page_config(layout="wide")
+#st.set_page_config(layout="wide")
 from auth.auth import *
 from main.garmin import *
 

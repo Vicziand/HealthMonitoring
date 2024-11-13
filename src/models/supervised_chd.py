@@ -13,8 +13,6 @@ import tensorflow as tf
 from sklearn import svm
 from sklearn.model_selection import GridSearchCV
 
-
-
 def create_chd_variables():
     
     conn = db_utils.db_connection()
@@ -31,7 +29,7 @@ def create_chd_variables():
     x = data[['male', 'age', 'cigsperday', 'bpmeds', 
               'prevalentstroke', 'prevalenthyp', 'diabetes', 'heartrate', 'bmi']]
     
-    print(x.isna().any())
+    
     
     # Függő változó
     y = data[['tenyearchd']]
@@ -112,7 +110,7 @@ def model_accuracy(model, X_test_scaled, y_test):
     # Zavarási mátrix és részletes elemzés
     cm = confusion_matrix(y_test, y_pred)
     
-    print(classification_report(y_test, y_pred))
+    #print(classification_report(y_test, y_pred))
 
     accuracy = accuracy_score(y_test, y_pred)
     #st.write(f"A modell pontossága: {accuracy * 100:.2f}%")
