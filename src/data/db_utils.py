@@ -226,7 +226,7 @@ def register_user(email, password, user_profile_id):
     cur = conn.cursor()
 
     try:
-        hashed_password = hash_password(password)
+        hashed_password = hash_password(password).decode('utf-8')
         cur.execute("INSERT INTO users (email, password_hash, userProfileId) VALUES (%s, %s, %s)", (email, hashed_password, user_profile_id))
         conn.commit()
     except psycopg2.IntegrityError:
