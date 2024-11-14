@@ -169,7 +169,15 @@ def data_clean_sleep():
 def data_load_sleep(data):
     conn = db_connection()
     cur = conn.cursor()
-    data = data.astype(float)
+    data['gender'] = data['gender'].astype(float)
+    data['Age'] = data['Age'].astype(float)
+    data['Sleep Duration'] = data['Sleep Duration'].astype(float)
+    data['Quality of Sleep'] = data['Quality of Sleep'].astype(float)
+    data['Physical Activity Level'] = data['Physical Activity Level'].astype(float)
+    data['Stress Level'] = data['Stress Level'].astype(float)
+    data['bmi'] = data['bmi'].astype(float)
+    data['Heart Rate'] = data['Heart Rate'].astype(float)
+    data['Daily Steps'] = data['Daily Steps'].astype(float)
 
     # Minden sor beszúrása a táblába
     insert_query = """
