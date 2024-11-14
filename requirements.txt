@@ -37,5 +37,4 @@ thread
 trove_classifiers
 urllib3_secure_extra
 xgboost
-xmlrpclib
 ydata_profiling
