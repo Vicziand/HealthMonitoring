@@ -9,31 +9,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from data.garmin_data_loader import *
 
 def authenticate_garmin(email, password):
-    try:
-        # Ellenőrizzük, hogy a felhasználó létezik-e az adatbázisban
-        conn = db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT password_hash FROM users WHERE email = %s", (email,))
-        row = cur.fetchone()
-        cur.close()
-        conn.close()
-
-        if row is None:
-            return False
-
-        # A jelszót bytes formátumba konvertáljuk az ellenőrzéshez
-        stored_hashed_password = row[0].encode('utf-8')
-
-        # Ellenőrizzük a jelszót a bcrypt használatával
-        if bcrypt.checkpw(password.encode('utf-8'), stored_hashed_password):
-            st.session_state["authenticated"] = True
-            return True
-        else:
-            st.session_state["authenticated"] = False
-            return False
-
-    except psycopg2.Error as e:
-        st.error(f"Adatbázis hiba: {e}")
+    if garmin_login(email, password):
+        st.session_state["authenticated"] = True
+        return True
+    else:
         st.session_state["authenticated"] = False
         return False
     

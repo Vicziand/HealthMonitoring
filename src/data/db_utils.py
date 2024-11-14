@@ -10,6 +10,8 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 import bcrypt
+import hashlib
+import os
 
 db_config = st.secrets["database"]
 
@@ -217,16 +219,19 @@ def create_users_table():
     conn.close()
 
 def hash_password(password):
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_password
+    # 16 byte véletlenszerű só generálása
+    salt = os.urandom(16)
+    # A jelszó hash-elése a salt használatával
+    hashed_password = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+    # A só és a hash együttes visszaadása
+    return salt + hashed_password
     
 def register_user(email, password, user_profile_id):
     conn = db_connection()
     cur = conn.cursor()
 
     try:
-        hashed_password = hash_password(password).decode('utf-8')
+        hashed_password = hash_password(password)
         cur.execute("INSERT INTO users (email, password_hash, userProfileId) VALUES (%s, %s, %s)", (email, hashed_password, user_profile_id))
         conn.commit()
     except psycopg2.IntegrityError:
@@ -283,8 +288,8 @@ def save_heart_rate_data(records):
     conn = db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("INSERT INTO heartrates (timestamp, heartrate, userProfileId) VALUES (%s, %s, %s)",
-                records)
+        cur.executemany("INSERT INTO heartrates (timestamp, heartrate, userProfileId) VALUES (%s, %s, %s)",
+                 records)
         
         conn.commit()
     except Exception as e:

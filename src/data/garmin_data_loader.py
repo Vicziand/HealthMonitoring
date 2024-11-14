@@ -40,6 +40,32 @@ def garmin_login(email, password):
         
         # Szívritmus adatok táblájának létrehozása
         create_heartrate_table()
+        
+        # Szívritmus adatok lekérése minden napra külön
+        heart_rate_records = []  # Adatok tárolása a tömeges beillesztéshez
+        for date in date_range:
+            heart_rate_data = client.get_heart_rates(date.isoformat())
+            if heart_rate_data:
+                data = heart_rate_data.get('heartRateValues', [])
+                if data:  # Ellenőrizzük, hogy van-e adat
+                    for record in data:
+                        if len(record) == 2:
+                            timestamp = record[0]
+                            heartrate = record[1]
+                            if timestamp is not None and heartrate is not None:
+                                heart_rate_records.append((timestamp, heartrate, user_profile_id))
+                        else:
+                            print(f"Nem várt formátum: {record}")
+            else:
+                print(f"Nincs szívritmus adat a következő napra: {date.isoformat()}")
+
+        # Tömeges betöltés szívritmus adatok
+        if heart_rate_records:
+            save_heart_rate_data(heart_rate_records)
+     
+        
+        # Tevékenységek és alvási adatok táblájának létrehozása
+        create_activities_table()
 
         activities_records = []  # Adatok tárolása a tömeges beillesztéshez
         for date in date_range:
@@ -87,9 +113,9 @@ def garmin_login(email, password):
         GarminConnectAuthenticationError,
         GarminConnectTooManyRequestsError,
     ) as err:
-        st.write(f"Hiba történt: {err}")
+        print(f"Hiba történt: {err}")
 
     except Exception as e:
-        st.write(f"Ismeretlen hiba történt: {e}")
+        print(f"Ismeretlen hiba történt: {e}")
     
     return False
