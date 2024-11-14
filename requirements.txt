@@ -12,7 +12,6 @@ imbalanced_learn
 ipython
 ipywidgets
 Jinja2
-jnius
 keyring
 matplotlib
 numpy
