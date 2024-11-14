@@ -23,7 +23,6 @@ psycopg2_binary
 pyOpenSSL
 python_bcrypt
 python_dateutil
-pywin32
 railroad
 redis
 scikit_learn
