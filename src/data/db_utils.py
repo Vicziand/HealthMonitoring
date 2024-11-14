@@ -171,15 +171,16 @@ def data_load_sleep(data):
     cur = conn.cursor()
 
     # Minden sor beszúrása a táblába
-    for i, row in data.iterrows():
-        cur.execute("""
-            INSERT INTO sleep (gender, age, duration, quality, activity, 
-            stress, bmi, heartrate, steps, disorder)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (row['gender'], row['Age'], row['Sleep Duration'], row['Quality of Sleep'], 
-            row['Physical Activity Level'], row['Stress Level'], row['bmi'], row['Heart Rate'],
-            row['Daily Steps'], row['disorder']))
-        
+    insert_query = """
+        INSERT INTO sleep (gender, age, duration, quality, activity, 
+        stress, bmi, heartrate, steps, disorder)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    insert_values = data[['gender', 'Age', 'Sleep Duration', 'Quality of Sleep', 
+                      'Physical Activity Level', 'Stress Level', 'bmi', 'Heart Rate',
+                      'Daily Steps', 'disorder']].values.tolist()
+    
+    cur.executemany(insert_query, insert_values)  
     conn.commit()
     cur.close()
     conn.close()
