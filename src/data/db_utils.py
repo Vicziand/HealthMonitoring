@@ -169,6 +169,7 @@ def data_clean_sleep():
 def data_load_sleep(data):
     conn = db_connection()
     cur = conn.cursor()
+    data = data.astype(float)
 
     # Minden sor beszúrása a táblába
     insert_query = """
