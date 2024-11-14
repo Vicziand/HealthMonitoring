@@ -27,6 +27,7 @@ railroad
 redis
 scikit_learn
 seaborn
+setuptools
 Sphinx
 SQLAlchemy
 st_pages
