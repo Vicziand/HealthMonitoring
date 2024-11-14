@@ -1,6 +1,5 @@
 import streamlit as st
 from garminconnect import Garmin
-import bcrypt
 
 import os
 import sys

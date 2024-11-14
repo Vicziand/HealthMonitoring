@@ -1,5 +1,4 @@
 attr
-bcrypt
 colorama
 ConfigParser
 cryptography
