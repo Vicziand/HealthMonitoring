@@ -176,9 +176,9 @@ def data_load_sleep(data):
             INSERT INTO sleep (gender, age, duration, quality, activity, 
             stress, bmi, heartrate, steps, disorder)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (float(row['gender']), float(row['Age']), float(row['Sleep Duration']), float(row['Quality of Sleep']), 
-          float(row['Physical Activity Level']), float(row['Stress Level']), float(row['bmi']), float(row['Heart Rate']),
-          float(row['Daily Steps']), row['disorder']))
+        """, (row['gender'], row['Age'], row['Sleep Duration'], row['Quality of Sleep'], 
+            row['Physical Activity Level'], row['Stress Level'], row['bmi'], row['Heart Rate'],
+            row['Daily Steps'], row['disorder']))
         
     conn.commit()
     cur.close()
