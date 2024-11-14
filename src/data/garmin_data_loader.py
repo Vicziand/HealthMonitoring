@@ -87,9 +87,9 @@ def garmin_login(email, password):
         GarminConnectAuthenticationError,
         GarminConnectTooManyRequestsError,
     ) as err:
-        print(f"Hiba történt: {err}")
+        st.write(f"Hiba történt: {err}")
 
     except Exception as e:
-        print(f"Ismeretlen hiba történt: {e}")
+        st.write(f"Ismeretlen hiba történt: {e}")
     
     return False
