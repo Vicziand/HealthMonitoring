@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.title("Health Monitoring")
+st.markdown("<h1 style='text-align: center;'>Health Monitoring</h1>", unsafe_allow_html=True)
 col1, col2 = st.columns(2, gap="small", vertical_alignment="center")
 with col1:
     st.markdown("""Az alkalmazás célja az egészségügyi adatok folyamatos figyelése és elemzése. A felületen két predikció érhető el:
