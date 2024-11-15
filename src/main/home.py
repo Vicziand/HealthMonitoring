@@ -1,16 +1,13 @@
 import streamlit as st
 
-
+st.title("Health Monitoring")
 col1, col2 = st.columns(2, gap="small", vertical_alignment="center")
 with col1:
-    st.title("Health Monitoring")
-with col2:
-    st.image("src/health_monitoring.jpg", width=400)
-st.write("\n")
-
-st.markdown("""Az alkalmazás célja az egészségügyi adatok folyamatos figyelése és elemzése. A felületen két predikció érhető el:
+    st.markdown("""Az alkalmazás célja az egészségügyi adatok folyamatos figyelése és elemzése. A felületen két predikció érhető el:
 - Szívkoszorúér-betegség kockázatának előrejelzése
 - Alvási rendellenességek felismerésére""")
+with col2:
+    st.image("src/health_monitoring.jpg", width=400)
 st.write("\n")
 
 col3, col4 = st.columns(2, gap="small")
