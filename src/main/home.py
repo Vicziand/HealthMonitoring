@@ -11,6 +11,7 @@ st.write("\n")
 st.markdown("""Az alkalmazás célja az egészségügyi adatok folyamatos figyelése és elemzése. A felületen két predikció érhető el:
 - Szívkoszorúér-betegség kockázatának előrejelzése
 - Alvási rendellenességek felismerésére""")
+st.write("\n")
 
 col3, col4 = st.columns(2, gap="small")
 with col3:  
