@@ -148,5 +148,4 @@ if submit_button:
                     - Hozzon létre alvásbarát környezetet.
                     - Fontos a stresszkezelés.
                 """)
-    
-    print(user_pred)
+        

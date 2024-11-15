@@ -18,8 +18,6 @@ def create_sleep_variables():
     x = data[['gender', 'age', 'duration', 'quality', 'activity', 
               'stress', 'bmi', 'heartrate', 'steps']]
     
-    print(x.isna().any())
-    
     # Függő változó
     y = data[['disorder']]
     return x,y

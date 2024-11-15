@@ -19,6 +19,7 @@ pandas
 Pillow
 plotly
 protobuf
+psutil
 psycopg2_binary
 pyOpenSSL
 python_bcrypt

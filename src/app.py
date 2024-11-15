@@ -3,7 +3,21 @@ from st_pages import Page, Section, add_page_title, hide_pages
 #st.set_page_config(layout="wide")
 from auth.auth import *
 from main.garmin import *
+import psutil
 
+def monitor_resources():
+    # Aktuális folyamat (Streamlit alkalmazás) lekérése
+    process = psutil.Process(os.getpid())
+
+    # CPU használat lekérése
+    cpu_usage = process.cpu_percent(interval=1)
+
+    # RAM használat lekérése
+    memory_info = process.memory_info()
+    ram_usage = memory_info.rss / (1024 * 1024)  # RAM használat MB-ban
+
+    st.write(f"Az alkalmazás CPU kihasználása: {cpu_usage}%")
+    st.write(f"Az alkalmazás memóriahasználata: {ram_usage:.2f} MB")
 
 
 home = st.Page("main/home.py", title="Főoldal", icon="🏠")
@@ -33,7 +47,7 @@ if st.session_state["authenticated"]:
     if st.sidebar.button("Kijelentkezés"):
         st.session_state["authenticated"] = False
         st.session_state["page"] = "Főoldal"
-        
+    monitor_resources()
     show_data()
 
 else:
@@ -46,7 +60,9 @@ else:
             "Saját adat": [login_page]
         }
     )
-
+    monitor_resources()
 
 # Menü megjelenítése
 pg.run()
+
+
