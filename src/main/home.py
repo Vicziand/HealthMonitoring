@@ -6,7 +6,7 @@ with col1:
     st.title("Health Monitoring")
 with col2:
     st.image("src/health_monitoring.jpg", width=400)
-st.write("/n")
+st.write("\n")
 
 st.markdown("""Az alkalmazás célja az egészségügyi adatok folyamatos figyelése és elemzése. A felületen két predikció érhető el:
 - Szívkoszorúér-betegség kockázatának előrejelzése
@@ -18,6 +18,6 @@ with col3:
      A bejelentkezéshez a GarminConnect alkalmazás regisztrációjakor használt felhasználónév és jelszó szükséges""")
 with col4:
     st.image("src/smartwatch_photo.jpg", width=400)
-st.write("/n")
+st.write("\n")
 
 st.markdown("""Az előrejelzések nem minősülnek valódi orvosi diagnózisnak. Az eredmények kizárólag tájékoztatási célt szolgálnak, és nem helyettesítik az orvosi konzultációt vagy szakértelmet.""")
