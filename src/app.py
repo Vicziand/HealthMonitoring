@@ -16,8 +16,8 @@ def monitor_resources():
     memory_info = process.memory_info()
     ram_usage = memory_info.rss / (1024 * 1024)  # RAM használat MB-ban
 
-    st.write(f"Az alkalmazás CPU kihasználása: {cpu_usage}%")
-    st.write(f"Az alkalmazás memóriahasználata: {ram_usage:.2f} MB")
+    #st.write(f"Az alkalmazás CPU kihasználása: {cpu_usage}%")
+    #st.write(f"Az alkalmazás memóriahasználata: {ram_usage:.2f} MB")
 
 
 home = st.Page("main/home.py", title="Főoldal", icon="🏠")
