@@ -1,7 +1,6 @@
 import streamlit as st
 import os
 import sys
-# A könyvtár relatív elérési útja
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from models.supervised_chd import *
 from models.supervised_sleep import *

@@ -1,6 +1,3 @@
-import streamlit as st
-from datetime import datetime, timedelta
-import plotly.express as px
 from data.db_utils import *
 from main.garmin import *
 

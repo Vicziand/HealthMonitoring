@@ -1,8 +1,6 @@
 import psycopg2
 from sqlalchemy import create_engine
-#SQLAlchemy egy python csomag, ami sql adatbázis kapcsolat létrehozására szolgál
 import pandas as pd
-#A Pandas egy Python könyvtár, ami adatok feldolgozására és elemzésére szolgál.
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import LabelEncoder
 from sklearn.impute import SimpleImputer
@@ -100,7 +98,6 @@ def data_load_chd(data):
     # Lekérdezés végrehajtása
     cur.execute(insert_query)
     
-    
     conn.commit()
     cur.close()
     conn.close()
@@ -142,10 +139,8 @@ def clear_sleep_table():
     conn.close()
     
 def data_clean_sleep():
-    # Az adat beolvasása
     Rawdata = pd.read_csv("src/data/raw/training_data_sleep.csv")
 
-    # Csak a szükséges oszlopok kiválasztása és másolat készítése
     data = Rawdata[['Gender', 'Age', 'Sleep Duration', 'Quality of Sleep', 'Physical Activity Level', 
                     'Stress Level', 'BMI Category', 'Heart Rate', 'Daily Steps', 'Sleep Disorder']].copy()
 
@@ -180,7 +175,6 @@ def data_load_sleep(data):
     data['Heart Rate'] = data['Heart Rate'].astype(float)
     data['Daily Steps'] = data['Daily Steps'].astype(float)
 
-    # Minden sor beszúrása a táblába
     insert_query = """
         INSERT INTO sleep (gender, age, duration, quality, activity, 
         stress, bmi, heartrate, steps, disorder)
@@ -218,11 +212,8 @@ def create_users_table():
     conn.close()
 
 def hash_password(password):
-    # 16 byte véletlenszerű só generálása
     salt = os.urandom(16)
-    # A jelszó hash-elése a salt használatával
     hashed_password = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
-    # A só és a hash együttes visszaadása
     return salt + hashed_password
     
 def register_user(email, password, user_profile_id):

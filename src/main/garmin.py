@@ -13,11 +13,8 @@ def show_heartrate():
 
     # Timestamp átalakítása datetime formátummá
     data_hr['timestamp'] = pd.to_datetime(data_hr['timestamp'], unit='ms')
-
-    # Adatok előkészítése a vizualizációhoz
     data_hr = data_hr.sort_values(by='timestamp')
 
-    # Plotly diagram készítése
     fig = px.line(
         data_hr, 
         x='timestamp', 
@@ -27,7 +24,6 @@ def show_heartrate():
         markers=True
     )
 
-    # Diagram megjelenítése a Streamlitben
     st.plotly_chart(fig)
     
 def activities_query():

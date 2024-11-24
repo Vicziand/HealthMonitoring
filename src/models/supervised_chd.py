@@ -10,7 +10,6 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import xgboost as xgb
 from data import db_utils
 from sklearn import svm
-from sklearn.model_selection import GridSearchCV
 
 def create_chd_variables():
     

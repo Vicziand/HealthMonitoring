@@ -1,4 +1,3 @@
-import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc, accuracy_score, precision_score, recall_score, f1_score
@@ -7,7 +6,6 @@ import numpy as np
 import os
 import sys
 
-# A könyvtár relatív elérési útja
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from models.supervised_sleep import *
 from data.db_utils import *

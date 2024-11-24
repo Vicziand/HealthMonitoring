@@ -1,5 +1,3 @@
-import pandas as pd
-import streamlit as st
 from data import db_utils
 from models.supervised_chd import *
 

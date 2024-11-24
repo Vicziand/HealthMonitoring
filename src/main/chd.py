@@ -1,20 +1,9 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
-import statsmodels.api as sm
-from imblearn.over_sampling import SMOTE
-import matplotlib.pyplot as plt
-
 
 import os
 import sys
-# A könyvtár relatív elérési útja
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from models.supervised_chd import *
 from data.db_utils import *
@@ -150,7 +139,6 @@ if submit_button:
     else:
         risk_level = "alacsony"
 
-# Kiírandó üzenetek listába rendezése
     messages = [
         f"A megadott paraméterek alapján {risk_level} a kockázati szint.",
         "Az életkor előrehaladtával növekszik a kockázat."

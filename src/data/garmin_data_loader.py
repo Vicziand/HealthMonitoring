@@ -6,11 +6,9 @@ from garminconnect import (
 )
 
 import datetime
-from dateutil import parser
 
 import os
 import sys
-# A könyvtár relatív elérési útja
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from data.db_utils import *
 
@@ -38,16 +36,14 @@ def garmin_login(email, password):
         create_users_table()
         register_user(email, password, user_profile_id)
         
-        # Szívritmus adatok táblájának létrehozása
         create_heartrate_table()
         
-        # Szívritmus adatok lekérése minden napra külön
-        heart_rate_records = []  # Adatok tárolása a tömeges beillesztéshez
+        heart_rate_records = []
         for date in date_range:
             heart_rate_data = client.get_heart_rates(date.isoformat())
             if heart_rate_data:
                 data = heart_rate_data.get('heartRateValues', [])
-                if data:  # Ellenőrizzük, hogy van-e adat
+                if data:  
                     for record in data:
                         if len(record) == 2:
                             timestamp = record[0]
@@ -63,11 +59,9 @@ def garmin_login(email, password):
         if heart_rate_records:
             save_heart_rate_data(heart_rate_records)
      
-        
-        # Tevékenységek és alvási adatok táblájának létrehozása
         create_activities_table()
 
-        activities_records = []  # Adatok tárolása a tömeges beillesztéshez
+        activities_records = [] 
         for date in date_range:
             sleep_data = client.get_sleep_data(date.isoformat())
             activity_data = client.get_stats(date.isoformat())
@@ -102,7 +96,6 @@ def garmin_login(email, password):
             if all(value is not None for value in [userProfileId, totalSteps, averageStressLevel, sleepingSeconds, activeSeconds, sleepQuality, calendarDate]):
                 activities_records.append((totalSteps, averageStressLevel, sleepingSeconds, activeSeconds, sleepQuality, userProfileId, calendarDate))
 
-        # Tömeges betöltés tevékenységek adatai
         if activities_records:
             save_activities_data(activities_records)
 
